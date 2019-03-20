@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginLeft="80dp"
+        android:layout_marginRight="3dp"
+        android:layout_marginTop="5dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="3dp"
+        card_view:cardBackgroundColor="#529215"
+        card_view:cardElevation="1dp"
+        card_view:cardCornerRadius="15dp">
+
+        <TextView
+            android:id="@+id/message_send_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="13dp"
+            android:layout_marginRight="30dp"
+            android:layout_marginBottom="13dp"
+            android:text="fdsffsfsfas  "
+            android:textColor="#fff"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtMsgDate_sent"
+            android:layout_gravity="right|center"
+            android:layout_marginRight="3dp"
+            android:textSize="9dp"/>
+    </android.support.v7.widget.CardView>
+</RelativeLayout>
