@@ -1,9 +1,11 @@
 package com.example.muhammet.sohbetuygulamasi.Activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
@@ -96,12 +98,28 @@ public class AnaActivity extends AppCompatActivity {
 
     public void cik()
     {
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
 
-        auth.signOut();
-        Intent intent=new Intent(AnaActivity.this,GirisActivity.class);
-        startActivity(intent);
-        finish();
-        stateDegistir(false);
+        builder.setMessage("Çıkış yapmak istiyor musunuz?")
+                .setCancelable(false)
+                .setNegativeButton("Evet", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        auth.signOut();
+                        Intent intent=new Intent(AnaActivity.this,GirisActivity.class);
+                        startActivity(intent);
+                        finish();
+                        stateDegistir(false);
+                    }
+                })
+                .setPositiveButton("Hayır", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alertDialog=builder.create();
+        alertDialog.show();
     }
 
     public void stateDegistir(Boolean state)
