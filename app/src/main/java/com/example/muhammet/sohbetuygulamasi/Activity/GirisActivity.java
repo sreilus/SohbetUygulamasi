@@ -5,6 +5,7 @@ import android.icu.lang.UCharacterEnums;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,17 +13,27 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.muhammet.sohbetuygulamasi.R;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 public class GirisActivity extends AppCompatActivity {
 
     private EditText input_email_login, input_password_login;
     private Button loginButon;
     private FirebaseAuth auth;
+    private FirebaseDatabase database;
+    private DatabaseReference reference;
     TextView kayitOlText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +59,7 @@ public class GirisActivity extends AppCompatActivity {
                 }
             }
         });
+
         kayitOlText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,6 +68,7 @@ public class GirisActivity extends AppCompatActivity {
                 finish();
             }
         });
+
     }
 
     public void sistemeGiris(String email, String pass) {
@@ -63,6 +76,10 @@ public class GirisActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
+                    String device_token = FirebaseInstanceId.getInstance().getToken();
+                    database=FirebaseDatabase.getInstance();
+                    reference=database.getReference();
+                    reference.child("Kullanicilar").child(auth.getUid()).child("device_token").setValue(device_token);
                     Intent intent = new Intent(GirisActivity.this, AnaActivity.class);
                     startActivity(intent);
                     finish();

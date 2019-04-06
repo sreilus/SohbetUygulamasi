@@ -2,22 +2,36 @@ package com.example.muhammet.sohbetuygulamasi.Activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import com.example.muhammet.sohbetuygulamasi.Fragment.AnaSayfaFragment;
 import com.example.muhammet.sohbetuygulamasi.Fragment.BildirimFragment;
 import com.example.muhammet.sohbetuygulamasi.Fragment.KullaniciProfilFragment;
 import com.example.muhammet.sohbetuygulamasi.R;
 import com.example.muhammet.sohbetuygulamasi.Utils.ChangeFragment;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
+
+import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.Calendar;
+import java.util.Date;
+
 
 public class AnaActivity extends AppCompatActivity {
 
@@ -56,13 +70,14 @@ public class AnaActivity extends AppCompatActivity {
         tanimla();
         kontrol();
         changeFragment = new ChangeFragment(AnaActivity.this);
-
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        changeFragment.change(new AnaSayfaFragment());
     }
 
     public void tanimla()
     {
+        FirebaseApp.initializeApp(this);
         auth=FirebaseAuth.getInstance();
         user=auth.getCurrentUser();
         //userId=user.getUid().toString();
@@ -126,8 +141,16 @@ public class AnaActivity extends AppCompatActivity {
     {
         userId=user.getUid();
         FirebaseDatabase firebaseDatabase=FirebaseDatabase.getInstance();
-        DatabaseReference reference=firebaseDatabase.getReference().child("Kullanicilar").child(userId);
-        reference.child("state").setValue(state);
+        DatabaseReference reference=firebaseDatabase.getReference();
+        reference.child("Kullanicilar").child(userId).child("state").setValue(state);
+        if (state==false)
+        {
+            String strDate="dsfssd";
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            strDate=dateFormat.format(date);
+            reference.child("Kullanicilar").child(userId).child("last_seen").setValue(strDate);
+        }
     }
 
 }

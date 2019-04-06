@@ -7,9 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.muhammet.sohbetuygulamasi.Adapters.MessageAdapter;
 import com.example.muhammet.sohbetuygulamasi.Fragment.OtherProfileFragment;
@@ -26,6 +28,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
@@ -36,6 +39,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
@@ -51,6 +55,9 @@ public class ChatActivity extends AppCompatActivity {
     RecyclerView chat_recy_view;
     MessageAdapter messageAdapter;
     List<String> keyList;
+    String last_seen="";
+    String userId;
+    String state;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +66,15 @@ public class ChatActivity extends AppCompatActivity {
         tanimla();
         action();
         loadMessage();
+        stateDegistir(true);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        stateDegistir(true);
+    }
+
 
     public String getUserName() {
         Bundle bundle = getIntent().getExtras();
@@ -73,8 +88,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void tanimla() {
-        chat_username_textview = findViewById(R.id.chat_username_textview);
-        chat_username_textview.setText(getUserName());
+
         auth = FirebaseAuth.getInstance();
         firebaseUser = auth.getCurrentUser();
         firebaseDatabase = FirebaseDatabase.getInstance();
@@ -88,6 +102,54 @@ public class ChatActivity extends AppCompatActivity {
         chat_recy_view.setLayoutManager(layoutManager);
         messageAdapter=new MessageAdapter(keyList,ChatActivity.this,ChatActivity.this,messageModelList);
         chat_recy_view.setAdapter(messageAdapter);
+        reference.child("Kullanicilar").child(getOtherId()).child("state").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                state=dataSnapshot.getValue(Boolean.class).toString();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        reference.child("Kullanicilar").child(getOtherId()).child("last_seen").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                last_seen=dataSnapshot.getValue(String.class);
+                Log.i("datee",last_seen);
+                chat_username_textview = findViewById(R.id.chat_username_textview);
+                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                Date date = new Date();
+                Log.i("dene","/"+dateFormat.format(date).substring(11,16)+"/"+" last:/"+last_seen.substring(11,16)+"/");
+                /*if(dateFormat.format(date).substring(0,16).equals(last_seen.substring(0,16).toString()))
+                {
+                    last_seen="Çevrimiçi";
+                }*/
+                if(state.equals("true"))
+                {
+                    last_seen="Çevrimiçi";
+                }
+                else
+                {
+                    if(dateFormat.format(date).substring(0,11).equals(last_seen.substring(0,11)))
+                    {
+                        last_seen="Son Görülme: Bugün "+last_seen.substring(11,16);
+                    }
+                    else
+                    {
+                        last_seen="Son Görülme: "+last_seen.substring(0,16);
+                    }
+                }
+                String goster=getUserName()+"\n"+last_seen;
+                chat_username_textview.setText(goster);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void action() {
@@ -99,12 +161,10 @@ public class ChatActivity extends AppCompatActivity {
                 messageTextEdittext.setText("");
             }
         });
-
-
     }
 
 
-    public void sendMessage(final String userId, final String otherId, String textType, String date, Boolean seen, String messageText) {
+    public void sendMessage(final String userId, final String otherId, String textType, String date, Boolean seen, final String messageText) {
         final String mesajId = reference.child("Mesajlar").child(userId).child(otherId).push().getKey();
 
         final Map messageMap = new HashMap();
@@ -120,7 +180,14 @@ public class ChatActivity extends AppCompatActivity {
                 reference.child("Mesajlar").child(otherId).child(userId).child(mesajId).setValue(messageMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        Date now = new Date();
+                        int not_id = Integer.parseInt(new SimpleDateFormat("ddHHmmss",  Locale.US).format(now));
+                        reference.child("Notifications").child(otherId).child(String.valueOf(not_id)).child("deger").setValue(messageText).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
 
+                            }
+                        });
                     }
                 });
             }
@@ -159,5 +226,21 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void stateDegistir(Boolean state)
+    {
+        userId=firebaseUser.getUid();
+        FirebaseDatabase firebaseDatabase=FirebaseDatabase.getInstance();
+        DatabaseReference reference=firebaseDatabase.getReference();
+        reference.child("Kullanicilar").child(userId).child("state").setValue(state);
+        if (state==false)
+        {
+            String strDate="dsfssd";
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            strDate=dateFormat.format(date);
+            reference.child("Kullanicilar").child(userId).child("last_seen").setValue(strDate);
+        }
     }
 }

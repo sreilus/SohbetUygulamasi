@@ -33,7 +33,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -154,6 +157,7 @@ public class OtherProfileFragment extends Fragment {
                 intent.putExtra("userName",userProfileNameText2.getText().toString());
                 intent.putExtra("id",otherId);
                 startActivity(intent);
+                stateDegistir(true);
             }
         });
 
@@ -368,5 +372,21 @@ public class OtherProfileFragment extends Fragment {
 
             }
         });
+    }
+
+    public void stateDegistir(Boolean state)
+    {
+        userId=user.getUid();
+        FirebaseDatabase firebaseDatabase=FirebaseDatabase.getInstance();
+        DatabaseReference reference=firebaseDatabase.getReference();
+        reference.child("Kullanicilar").child(userId).child("state").setValue(state);
+        if (state==false)
+        {
+            String strDate="dsfssd";
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            strDate=dateFormat.format(date);
+            reference.child("Kullanicilar").child(userId).child("last_seen").setValue(strDate);
+        }
     }
 }
